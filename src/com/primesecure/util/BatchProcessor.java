@@ -6,17 +6,19 @@
 package com.primesecure.util;
 
 import com.primesecure.model.Message;
+import com.primesecure.model.PrimesList;
 import com.primesecure.thread.MessageProcessorThread;
-
-import java.io.*;
+import com.primesecure.thread.PrimeCheckerThread;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
- * Processes batches of messages from files.
+ * Utilidad para procesar lotes de operaciones usando multihilos.
  * <p>
- * This utility class handles loading multiple messages from a file
- * and processing them in parallel using threads.
+ * Esta clase proporciona metodos para realizar operaciones en lote
+ * como busqueda de numeros primos y procesamiento de mensajes utilizando
+ * multiples hilos para mejorar el rendimiento.
  * </p>
  * 
  * @author PrimeSecure Team
@@ -26,100 +28,110 @@ import java.util.List;
 public class BatchProcessor {
     
     /**
-     * Loads messages from a CSV file and processes them in parallel.
-     * <p>
-     * Expected CSV format: content,sender,recipient,primeCode
-     * </p>
-     * 
-     * @param filePath Path to the CSV file containing messages
-     * @param encrypt Whether to encrypt (true) or decrypt (false) the messages
-     * @param threadCount Number of threads to use for processing
-     * @return List of processed messages
-     * @throws IOException If file operations fail
-     */
-    public static List<Message> processBatchFromCsv(String filePath, boolean encrypt, int threadCount) 
-            throws IOException {
+    * Busca numeros primos en un rango usando multiples hilos.
+    * <p>
+    * Este metodo divide el rango en segmentos y asigna cada segmento
+    * a un hilo diferente para buscar numeros primos en paralelo.
+    * </p>
+    * 
+    * @param startRange El inicio del rango (inclusive)
+    * @param endRange El fin del rango (inclusive)
+    * @param threadCount El numero de hilos a utilizar
+    * @return Una lista de los numeros primos encontrados
+    */
+    public static PrimesList findPrimesInRange(int startRange, int endRange, int threadCount) {
+        if (startRange < 2) startRange = 2; // El primer numero primo es 2
         
-        List<Message> messages = new ArrayList<>();
+        // Validar parametros
+        if (endRange < startRange) {
+            throw new IllegalArgumentException("El rango final debe ser mayor o igual al rango inicial");
+        }
         
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            // Skip header if present
-            if ((line = reader.readLine()) != null && line.startsWith("content")) {
-                // This was the header, move to next line
-                line = reader.readLine();
-            }
+        // Usar al menos un hilo
+        int actualThreadCount = Math.max(1, threadCount);
+        
+        // Calcular el tamaño del rango para cada hilo
+        int rangeSize = (endRange - startRange + 1) / actualThreadCount;
+        
+        // Crear la lista compartida para almacenar los primos
+        PrimesList primesList = new PrimesList();
+        
+        // Crear e iniciar los hilos
+        List<PrimeCheckerThread> threads = new ArrayList<>();
+        
+        for (int i = 0; i < actualThreadCount; i++) {
+            int threadStartRange = startRange + (i * rangeSize);
+            int threadEndRange = (i == actualThreadCount - 1) 
+                ? endRange 
+                : threadStartRange + rangeSize - 1;
             
-            // Read messages
-            while (line != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 4) {
-                    String content = parts[0];
-                    String sender = parts[1];
-                    String recipient = parts[2];
-                    int primeCode = Integer.parseInt(parts[3]);
-                    
-                    Message message = new Message(content, sender, recipient, primeCode);
-                    messages.add(message);
-                }
-                line = reader.readLine();
+            PrimeCheckerThread thread = new PrimeCheckerThread(threadStartRange, threadEndRange, primesList);
+            thread.setName("PrimeChecker-" + (i + 1));
+            threads.add(thread);
+            thread.start();
+        }
+        
+        // Esperar a que todos los hilos terminen
+        for (PrimeCheckerThread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
         
-        // Process messages using threads
-        if (!messages.isEmpty()) {
-            MessageProcessorThread.processMessagesBatch(messages, encrypt, threadCount);
+        // Imprimir estadisticas
+        System.out.println("Busqueda de primos completada:");
+        int totalFound = 0;
+        for (PrimeCheckerThread thread : threads) {
+            totalFound += thread.getFoundCount();
+            System.out.println(thread.getName() + " encontro " + thread.getFoundCount() + " primos");
+        }
+        System.out.println("Total de primos encontrados: " + totalFound);
+        
+        return primesList;
+    }
+    
+    /**
+    * Procesa un lote de mensajes usando multiples hilos.
+    * <p>
+    * Este metodo encripta o desencripta una lista de mensajes en paralelo
+    * utilizando multiples hilos.
+    * </p>
+    * 
+    * @param messages La lista de mensajes a procesar
+    * @param encrypt Indicador de si se debe encriptar (true) o desencriptar (false)
+    * @param threadCount El numero de hilos a utilizar
+    */
+    public static void processMessages(List<Message> messages, boolean encrypt, int threadCount) {
+        if (messages == null || messages.isEmpty()) {
+            return;
+        }
+        
+        // Usar el metodo estatico de MessageProcessorThread
+        MessageProcessorThread.processMessagesBatch(messages, encrypt, threadCount);
+    }
+    
+    /**
+    * Genera una lista de mensajes de prueba.
+    * 
+    * @param count El numero de mensajes a generar
+    * @return Una lista de mensajes de prueba
+    */
+    public static List<Message> generateTestMessages(int count) {
+        List<Message> messages = new ArrayList<>();
+        
+        for (int i = 0; i < count; i++) {
+            int primeCode = PrimeCalculator.generateRandomPrime(100, 997);
+            Message message = new Message(
+                "Mensaje de prueba #" + (i + 1), 
+                "Remitente" + i, 
+                "Destinatario" + i, 
+                primeCode
+            );
+            messages.add(message);
         }
         
         return messages;
-    }
-    
-    /**
-     * Saves a list of messages to a CSV file.
-     * 
-     * @param messages The list of messages to save
-     * @param filePath The path where to save the CSV file
-     * @return Number of messages saved
-     * @throws IOException If file operations fail
-     */
-    public static int saveMessagesToCsv(List<Message> messages, String filePath) throws IOException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            // Write header
-            writer.println("content,sender,recipient,primeCode,encryptionStatus");
-            
-            // Write messages
-            for (Message message : messages) {
-                writer.printf("%s,%s,%s,%d,%s\n",
-                    message.getContent().replace(",", "\\,"),
-                    message.getSender().replace(",", "\\,"),
-                    message.getRecipient().replace(",", "\\,"),
-                    message.getPrimeCode(),
-                    message.isEncrypted() ? "encrypted" : "plain"
-                );
-            }
-        }
-        
-        return messages.size();
-    }
-    
-    /**
-     * Generates a template CSV file for batch message processing.
-     * 
-     * @param filePath The path where to save the template
-     * @param sampleCount Number of sample rows to include
-     * @throws IOException If file operations fail
-     */
-    public static void generateBatchTemplate(String filePath, int sampleCount) throws IOException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            // Write header
-            writer.println("content,sender,recipient,primeCode");
-            
-            // Write sample rows
-            for (int i = 1; i <= sampleCount; i++) {
-                int randomPrime = PrimeCalculator.generateRandomPrime(100, 997);
-                writer.printf("Mensaje de ejemplo %d,Remitente%d,Destinatario%d,%d\n", 
-                             i, i, i, randomPrime);
-            }
-        }
     }
 }

@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * A thread implementation for processing messages in batch.
+ * Una implementacion de hilo para procesar mensajes en lote.
  * <p>
- * This class provides functionality to encrypt or decrypt multiple
- * messages concurrently using multiple threads.
+ * Esta clase proporciona funcionalidad para encriptar o desencriptar multiples
+ * mensajes concurrentemente usando multiples hilos.
  * </p>
  * 
  * @author PrimeSecure Team
@@ -22,22 +22,22 @@ import java.util.concurrent.CountDownLatch;
  */
 public class MessageProcessorThread extends Thread {
     
-    /** The list of messages to process */
+    /** La lista de mensajes a procesar */
     private List<Message> messages;
     
-    /** Flag indicating whether to encrypt (true) or decrypt (false) */
+    /** Indicador de si se debe encriptar (true) o desencriptar (false) */
     private boolean encrypt;
     
-    /** Synchronization barrier for thread completion */
+    /** Barrera de sincronizacion para la finalizacion de hilos */
     private CountDownLatch latch;
     
     /**
-     * Creates a new message processor thread.
-     * 
-     * @param messages The list of messages to process
-     * @param encrypt Flag indicating whether to encrypt (true) or decrypt (false)
-     * @param latch Synchronization barrier for thread completion
-     */
+    * Crea un nuevo hilo procesador de mensajes.
+    * 
+    * @param messages La lista de mensajes a procesar
+    * @param encrypt Indicador de si se debe encriptar (true) o desencriptar (false)
+    * @param latch Barrera de sincronizacion para la finalizacion de hilos
+    */
     public MessageProcessorThread(List<Message> messages, boolean encrypt, CountDownLatch latch) {
         this.messages = messages;
         this.encrypt = encrypt;
@@ -45,12 +45,12 @@ public class MessageProcessorThread extends Thread {
     }
     
     /**
-     * Executes the message processing when the thread is started.
-     * <p>
-     * This method iterates through the messages and performs either
-     * encryption or decryption based on the encrypt flag.
-     * </p>
-     */
+    * Ejecuta el procesamiento de mensajes cuando se inicia el hilo.
+    * <p>
+    * Este metodo itera a traves de los mensajes y realiza
+    * encriptacion o desencriptacion basado en el indicador encrypt.
+    * </p>
+    */
     @Override
     public void run() {
         try {
@@ -61,7 +61,7 @@ public class MessageProcessorThread extends Thread {
                     message.decrypt();
                 }
                 
-                // Optional: Add a small delay to demonstrate thread interleaving
+                // Opcional: Agregar un pequeño retraso para demostrar entrelazado de hilos
                 Thread.sleep(10);
             }
         } catch (InterruptedException e) {
@@ -72,30 +72,30 @@ public class MessageProcessorThread extends Thread {
     }
     
     /**
-     * Static utility method to process a batch of messages using multiple threads.
-     * <p>
-     * This method distributes the workload across the specified number of threads
-     * and waits for all threads to complete before returning.
-     * </p>
-     * 
-     * @param messages The list of messages to process
-     * @param encrypt Flag indicating whether to encrypt (true) or decrypt (false)
-     * @param threadCount The number of threads to use for processing
-     */
+    * Metodo estatico de utilidad para procesar un lote de mensajes usando multiples hilos.
+    * <p>
+    * Este metodo distribuye la carga de trabajo entre el numero especificado de hilos
+    * y espera a que todos los hilos completen antes de retornar.
+    * </p>
+    * 
+    * @param messages La lista de mensajes a procesar
+    * @param encrypt Indicador de si se debe encriptar (true) o desencriptar (false)
+    * @param threadCount El numero de hilos a usar para el procesamiento
+    */
     public static void processMessagesBatch(List<Message> messages, boolean encrypt, int threadCount) {
         if (messages == null || messages.isEmpty()) {
             return;
         }
         
-        // Use at least one thread, but not more than the message count
+        // Usar al menos un hilo, pero no mas que la cantidad de mensajes
         int actualThreadCount = Math.min(Math.max(1, threadCount), messages.size());
         CountDownLatch latch = new CountDownLatch(actualThreadCount);
         
-        // Calculate messages per thread
+        // Calcular mensajes por hilo
         int messagesPerThread = messages.size() / actualThreadCount;
         int remainingMessages = messages.size() % actualThreadCount;
         
-        // Create and start threads
+        // Crear e iniciar hilos
         int startIndex = 0;
         for (int i = 0; i < actualThreadCount; i++) {
             int threadMessageCount = messagesPerThread + (i < remainingMessages ? 1 : 0);
@@ -109,7 +109,7 @@ public class MessageProcessorThread extends Thread {
             startIndex = endIndex;
         }
         
-        // Wait for all threads to complete
+        // Esperar a que todos los hilos completen
         try {
             latch.await();
         } catch (InterruptedException e) {

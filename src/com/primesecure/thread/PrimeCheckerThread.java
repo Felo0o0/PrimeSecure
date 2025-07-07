@@ -8,11 +8,10 @@ package com.primesecure.thread;
 import com.primesecure.model.PrimesList;
 
 /**
- * A thread implementation for finding prime numbers within a specified range.
+ * Una implementacion de hilo para encontrar numeros primos dentro de un rango especificado.
  * <p>
- * This class extends Thread to enable concurrent prime number checking.
- * It searches for prime numbers within a given range and adds them to
- * a shared PrimesList.
+ * Esta clase extiende Thread para permitir la verificacion concurrente de numeros primos.
+ * Busca numeros primos dentro de un rango dado y los agrega a una PrimesList compartida.
  * </p>
  * 
  * @author PrimeSecure Team
@@ -21,25 +20,25 @@ import com.primesecure.model.PrimesList;
  */
 public class PrimeCheckerThread extends Thread {
     
-    /** The starting number of the range to check */
+    /** El numero inicial del rango a verificar */
     private int startRange;
     
-    /** The ending number of the range to check */
+    /** El numero final del rango a verificar */
     private int endRange;
     
-    /** The shared list to store found prime numbers */
+    /** La lista compartida para almacenar los numeros primos encontrados */
     private PrimesList primesList;
     
-    /** Counter for prime numbers found by this thread */
+    /** Contador de numeros primos encontrados por este hilo */
     private int foundCount;
     
     /**
-     * Creates a new prime checker thread.
-     * 
-     * @param startRange The starting number of the range (inclusive)
-     * @param endRange The ending number of the range (inclusive)
-     * @param primesList The shared list to store found prime numbers
-     */
+    * Crea un nuevo hilo verificador de primos.
+    * 
+    * @param startRange El numero inicial del rango (inclusive)
+    * @param endRange El numero final del rango (inclusive)
+    * @param primesList La lista compartida para almacenar los numeros primos encontrados
+    */
     public PrimeCheckerThread(int startRange, int endRange, PrimesList primesList) {
         this.startRange = startRange;
         this.endRange = endRange;
@@ -48,25 +47,30 @@ public class PrimeCheckerThread extends Thread {
     }
     
     /**
-     * Executes the prime number search when the thread is started.
-     * <p>
-     * This method checks each number in the specified range and adds
-     * prime numbers to the shared list.
-     * </p>
-     */
+    * Ejecuta la busqueda de numeros primos cuando se inicia el hilo.
+    * <p>
+    * Este metodo verifica cada numero en el rango especificado y agrega
+    * los numeros primos a la lista compartida.
+    * </p>
+    */
     @Override
     public void run() {
         System.out.println(Thread.currentThread().getName() + 
-                           " buscando primos entre " + startRange + " y " + endRange);
+        " buscando primos entre " + startRange + " y " + endRange);
         
         for (int num = startRange; num <= endRange; num++) {
             if (PrimesList.isPrime(num)) {
-                synchronized(primesList) {
-                    primesList.add(num);
+                try {
+                    synchronized(primesList) {
+                        primesList.add(num);
+                    }
+                    foundCount++;
+                } catch (IllegalArgumentException e) {
+                    // Este caso no debería ocurrir ya que verificamos isPrime antes
+                    System.out.println("Error inesperado: " + e.getMessage());
                 }
-                foundCount++;
                 
-                // Optional: Add a small delay to demonstrate thread interleaving
+                // Opcional: Agregar un pequeño retraso para demostrar entrelazado de hilos
                 try {
                     Thread.sleep(5);
                 } catch (InterruptedException e) {
@@ -77,14 +81,14 @@ public class PrimeCheckerThread extends Thread {
         }
         
         System.out.println(Thread.currentThread().getName() + 
-                           " encontro " + foundCount + " numeros primos");
+        " encontro " + foundCount + " numeros primos");
     }
     
     /**
-     * Gets the number of prime numbers found by this thread.
-     * 
-     * @return The count of prime numbers found
-     */
+    * Obtiene el numero de numeros primos encontrados por este hilo.
+    * 
+    * @return El conteo de numeros primos encontrados
+    */
     public int getFoundCount() {
         return foundCount;
     }

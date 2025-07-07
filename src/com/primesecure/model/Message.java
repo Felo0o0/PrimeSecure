@@ -8,10 +8,10 @@ package com.primesecure.model;
 import java.io.Serializable;
 
 /**
- * Represents a secure message in the PrimeSecure messaging system.
+ * Representa un mensaje seguro en el sistema de mensajeria PrimeSecure.
  * <p>
- * This class encapsulates all information related to a message, including
- * its content, sender, recipient, and the prime number used for encryption.
+ * Esta clase encapsula toda la informacion relacionada con un mensaje, incluyendo
+ * su contenido, remitente, destinatario, y el numero primo usado para encriptacion.
  * </p>
  * 
  * @author PrimeSecure Team
@@ -20,35 +20,35 @@ import java.io.Serializable;
  */
 public class Message implements Serializable {
     
-    /** Serialization version UID */
+    /** UID de serializacion */
     private static final long serialVersionUID = 1L;
     
-    /** The content of the message (can be plain or encrypted) */
+    /** El contenido del mensaje (puede estar en texto plano o encriptado) */
     private String content;
     
-    /** The sender of the message */
+    /** El remitente del mensaje */
     private String sender;
     
-    /** The recipient of the message */
+    /** El destinatario del mensaje */
     private String recipient;
     
-    /** The prime code used for encryption/decryption */
+    /** El codigo primo usado para encriptacion/desencriptacion */
     private int primeCode;
     
-    /** Flag indicating whether the message is currently encrypted */
+    /** Indicador de si el mensaje esta actualmente encriptado */
     private boolean encrypted;
     
     /**
-     * Creates a new message with specified sender and recipient.
-     * <p>
-     * The message is created in unencrypted state by default.
-     * </p>
-     * 
-     * @param content The content of the message
-     * @param sender The sender of the message
-     * @param recipient The recipient of the message
-     * @param primeCode The prime code to be used for encryption/decryption
-     */
+    * Crea un nuevo mensaje con remitente y destinatario especificados.
+    * <p>
+    * El mensaje se crea en estado no encriptado por defecto.
+    * </p>
+    * 
+    * @param content El contenido del mensaje
+    * @param sender El remitente del mensaje
+    * @param recipient El destinatario del mensaje
+    * @param primeCode El codigo primo a usar para encriptacion/desencriptacion
+    */
     public Message(String content, String sender, String recipient, int primeCode) {
         this.content = content;
         this.sender = sender;
@@ -58,27 +58,27 @@ public class Message implements Serializable {
     }
     
     /**
-     * Creates a simplified message with default sender and recipient.
-     * <p>
-     * This constructor sets the sender to "Sistema" and recipient to "Usuario".
-     * </p>
-     * 
-     * @param content The content of the message
-     * @param primeCode The prime code to be used for encryption/decryption
-     */
+    * Crea un mensaje simplificado con remitente y destinatario predeterminados.
+    * <p>
+    * Este constructor establece el remitente como "Sistema" y el destinatario como "Usuario".
+    * </p>
+    * 
+    * @param content El contenido del mensaje
+    * @param primeCode El codigo primo a usar para encriptacion/desencriptacion
+    */
     public Message(String content, int primeCode) {
         this(content, "Sistema", "Usuario", primeCode);
     }
     
     /**
-     * Encrypts the message content using the prime code.
-     * <p>
-     * This method transforms the original content using the prime number
-     * as an encryption key. The implementation uses the PrimeEncoder.
-     * </p>
-     * 
-     * @see com.primesecure.security.PrimeEncoder
-     */
+    * Encripta el contenido del mensaje usando el codigo primo.
+    * <p>
+    * Este metodo transforma el contenido original usando el numero primo
+    * como clave de encriptacion. La implementacion utiliza el PrimeEncoder.
+    * </p>
+    * 
+    * @see com.primesecure.security.PrimeEncoder
+    */
     public void encrypt() {
         if (!encrypted) {
             this.content = new com.primesecure.security.PrimeEncoder().encode(content, primeCode);
@@ -87,14 +87,14 @@ public class Message implements Serializable {
     }
     
     /**
-     * Decrypts the message content using the prime code.
-     * <p>
-     * This method restores the original content using the prime number
-     * as a decryption key. The implementation uses the PrimeDecoder.
-     * </p>
-     * 
-     * @see com.primesecure.security.PrimeDecoder
-     */
+    * Desencripta el contenido del mensaje usando el codigo primo.
+    * <p>
+    * Este metodo restaura el contenido original usando el numero primo
+    * como clave de desencriptacion. La implementacion utiliza el PrimeDecoder.
+    * </p>
+    * 
+    * @see com.primesecure.security.PrimeDecoder
+    */
     public void decrypt() {
         if (encrypted) {
             this.content = new com.primesecure.security.PrimeDecoder().decode(content, primeCode);
@@ -103,46 +103,46 @@ public class Message implements Serializable {
     }
     
     /**
-     * Gets the content of the message.
-     * 
-     * @return The content (may be encrypted or plain)
-     */
+    * Obtiene el contenido del mensaje.
+    * 
+    * @return El contenido (puede estar encriptado o en texto plano)
+    */
     public String getContent() {
         return content;
     }
     
     /**
-     * Gets the sender of the message.
-     * 
-     * @return The sender's identifier
-     */
+    * Obtiene el remitente del mensaje.
+    * 
+    * @return El identificador del remitente
+    */
     public String getSender() {
         return sender;
     }
     
     /**
-     * Gets the recipient of the message.
-     * 
-     * @return The recipient's identifier
-     */
+    * Obtiene el destinatario del mensaje.
+    * 
+    * @return El identificador del destinatario
+    */
     public String getRecipient() {
         return recipient;
     }
     
     /**
-     * Gets the prime code used for encryption/decryption.
-     * 
-     * @return The prime number code
-     */
+    * Obtiene el codigo primo usado para encriptacion/desencriptacion.
+    * 
+    * @return El codigo de numero primo
+    */
     public int getPrimeCode() {
         return primeCode;
     }
     
     /**
-     * Checks if the message is currently encrypted.
-     * 
-     * @return true if the message is encrypted, false otherwise
-     */
+    * Verifica si el mensaje esta actualmente encriptado.
+    * 
+    * @return true si el mensaje esta encriptado, false en caso contrario
+    */
     public boolean isEncrypted() {
         return encrypted;
     }

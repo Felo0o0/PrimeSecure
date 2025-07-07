@@ -8,11 +8,11 @@ package com.primesecure.model;
 import java.util.ArrayList;
 
 /**
- * A specialized ArrayList that only stores prime numbers.
+ * Una ArrayList especializada que solo almacena numeros primos.
  * <p>
- * This class extends ArrayList with functionality to validate that
- * only prime numbers are added to the collection. It also provides
- * utility methods specific to prime number operations.
+ * Esta clase extiende ArrayList con funcionalidad para validar que
+ * solo numeros primos sean agregados a la coleccion. Tambien proporciona
+ * metodos de utilidad especificos para operaciones con numeros primos.
  * </p>
  * 
  * @author PrimeSecure Team
@@ -22,40 +22,61 @@ import java.util.ArrayList;
 public class PrimesList extends ArrayList<Integer> {
     
     /**
-     * Creates a new empty list of prime numbers.
-     */
+    * Crea una nueva lista vacia de numeros primos.
+    */
     public PrimesList() {
         super();
     }
     
     /**
-     * Adds a number to the list only if it is prime.
-     * <p>
-     * This method overrides the standard add method to ensure
-     * that only prime numbers can be added to the collection.
-     * </p>
-     * 
-     * @param number The number to add
-     * @return true if the number was added (is prime), false otherwise
-     */
+    * Agrega un numero a la lista solo si es primo.
+    * <p>
+    * Este metodo sobrescribe el metodo estandar de add para asegurar
+    * que solo numeros primos puedan ser agregados a la coleccion.
+    * </p>
+    * 
+    * @param number El numero a agregar
+    * @return true si el numero fue agregado (es primo)
+    * @throws IllegalArgumentException si el numero no es primo
+    */
     @Override
     public boolean add(Integer number) {
         if (isPrime(number)) {
             return super.add(number);
         }
+        throw new IllegalArgumentException("El numero " + number + " no es primo");
+    }
+    
+    /**
+    * Elimina un numero de la lista.
+    * <p>
+    * Este metodo sobrescribe el metodo estandar de remove para mantener
+    * la integridad de la lista de primos.
+    * </p>
+    * 
+    * @param o El objeto a eliminar
+    * @return true si el objeto fue eliminado
+    */
+    @Override
+    public boolean remove(Object o) {
+        if (o instanceof Integer) {
+            // No necesitamos verificar si es primo aquí, ya que solo 
+            // los números primos deberían estar en la lista
+            return super.remove(o);
+        }
         return false;
     }
     
     /**
-     * Checks if a number is prime.
-     * <p>
-     * A prime number is a natural number greater than 1 that cannot be
-     * formed by multiplying two smaller natural numbers.
-     * </p>
-     * 
-     * @param number The number to check
-     * @return true if the number is prime, false otherwise
-     */
+    * Verifica si un numero es primo.
+    * <p>
+    * Un numero primo es un numero natural mayor que 1 que no puede ser
+    * formado multiplicando dos numeros naturales menores.
+    * </p>
+    * 
+    * @param number El numero a verificar
+    * @return true si el numero es primo, false en caso contrario
+    */
     public static boolean isPrime(int number) {
         if (number <= 1) {
             return false;
@@ -79,17 +100,11 @@ public class PrimesList extends ArrayList<Integer> {
     }
     
     /**
-     * Gets a random prime number from the list.
-     * 
-     * @return A randomly selected prime number from the list,
-     *         or -1 if the list is empty
-     */
-    public int getRandomPrime() {
-        if (this.isEmpty()) {
-            return -1;
-        }
-        
-        int randomIndex = (int) (Math.random() * this.size());
-        return this.get(randomIndex);
+    * Obtiene la cantidad de numeros primos en la lista.
+    * 
+    * @return La cantidad de numeros primos en la lista
+    */
+    public int getPrimesCount() {
+        return this.size();
     }
-}
+}  

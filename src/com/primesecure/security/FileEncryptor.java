@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- * Handles encryption and decryption of text files using multithreading.
+ * Maneja la encriptacion y desencriptacion de archivos de texto usando multihilos.
  * <p>
- * This class provides functionality to process files in parallel, 
- * dividing the workload among multiple threads for improved performance.
+ * Esta clase proporciona funcionalidad para procesar archivos en paralelo, 
+ * dividiendo la carga de trabajo entre multiples hilos para mejorar el rendimiento.
  * </p>
  * 
  * @author PrimeSecure Team
@@ -26,8 +26,8 @@ import java.util.concurrent.*;
 public class FileEncryptor {
     
     /**
-     * Inner class representing a chunk of text to be processed by a thread.
-     */
+    * Clase interna que representa un fragmento de texto a ser procesado por un hilo.
+    */
     private static class TextChunk {
         private String content;
         private int primeCode;
@@ -41,8 +41,8 @@ public class FileEncryptor {
     }
     
     /**
-     * Thread implementation for processing text chunks.
-     */
+    * Implementacion de hilo para procesar fragmentos de texto.
+    */
     private static class TextProcessorThread implements Callable<String> {
         private TextChunk chunk;
         
@@ -61,36 +61,36 @@ public class FileEncryptor {
     }
     
     /**
-     * Processes a text file using parallel execution with multiple threads.
-     * 
-     * @param inputFile Path to the input file
-     * @param outputFile Path to the output file
-     * @param primeCode Prime number to use for encryption/decryption
-     * @param encrypt Flag indicating whether to encrypt (true) or decrypt (false)
-     * @param threadCount Number of threads to use
-     * @return Performance metrics as a string
-     * @throws IOException If file operations fail
-     */
+    * Procesa un archivo de texto usando ejecucion paralela con multiples hilos.
+    * 
+    * @param inputFile Ruta al archivo de entrada
+    * @param outputFile Ruta al archivo de salida
+    * @param primeCode Numero primo a usar para encriptacion/desencriptacion
+    * @param encrypt Indicador de si se debe encriptar (true) o desencriptar (false)
+    * @param threadCount Numero de hilos a usar
+    * @return Metricas de rendimiento como una cadena
+    * @throws IOException Si fallan las operaciones de archivo
+    */
     public static String processFile(String inputFile, String outputFile, 
-                                   int primeCode, boolean encrypt, int threadCount) throws IOException {
+                                    int primeCode, boolean encrypt, int threadCount) throws IOException {
         
         long startTime = System.currentTimeMillis();
         
-        // Read entire file content
+        // Leer todo el contenido del archivo
         String content = new String(Files.readAllBytes(Paths.get(inputFile)));
         
-        // Calculate chunk size
+        // Calcular tamaño de fragmento
         int chunkSize = Math.max(content.length() / threadCount, 1);
         List<TextChunk> chunks = new ArrayList<>();
         
-        // Divide content into chunks
+        // Dividir contenido en fragmentos
         for (int i = 0; i < content.length(); i += chunkSize) {
             int end = Math.min(i + chunkSize, content.length());
             String chunkContent = content.substring(i, end);
             chunks.add(new TextChunk(chunkContent, primeCode, encrypt));
         }
         
-        // Process chunks in parallel
+        // Procesar fragmentos en paralelo
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         List<Future<String>> futures = new ArrayList<>();
         
@@ -99,26 +99,26 @@ public class FileEncryptor {
             futures.add(future);
         }
         
-        // Collect results
+        // Recolectar resultados
         StringBuilder result = new StringBuilder();
         try {
             for (Future<String> future : futures) {
                 result.append(future.get());
             }
         } catch (InterruptedException | ExecutionException e) {
-            throw new IOException("Error processing file: " + e.getMessage());
+            throw new IOException("Error procesando archivo: " + e.getMessage());
         } finally {
             executor.shutdown();
         }
         
-        // Write result to output file
+        // Escribir resultado al archivo de salida
         try (FileWriter writer = new FileWriter(outputFile)) {
             writer.write(result.toString());
         }
         
         long endTime = System.currentTimeMillis();
         
-        // Generate performance report
+        // Generar reporte de rendimiento
         return String.format(
             "Archivo procesado exitosamente!\n" +
             "Operacion: %s\n" +

@@ -6,10 +6,10 @@
 package com.primesecure.security;
 
 /**
- * Provides functionality to encode messages using prime numbers.
+ * Proporciona funcionalidad para encriptar texto usando numeros primos.
  * <p>
- * This class implements a simple encryption algorithm based on
- * prime numbers to secure message content.
+ * Esta clase implementa un algoritmo de encriptacion basado en numeros primos
+ * para transformar texto plano en texto encriptado.
  * </p>
  * 
  * @author PrimeSecure Team
@@ -19,45 +19,44 @@ package com.primesecure.security;
 public class PrimeEncoder {
     
     /**
-     * Encodes a message using a prime number as the encryption key.
-     * <p>
-     * The algorithm performs a character-by-character transformation
-     * based on the prime number code.
-     * </p>
-     * 
-     * @param message The plain text message to encode
-     * @param primeCode The prime number to use as encryption key
-     * @return The encoded message
-     */
-    public String encode(String message, int primeCode) {
-        if (message == null || message.isEmpty()) {
-            return message;
+    * Encripta un texto usando un codigo primo como clave.
+    * <p>
+    * El algoritmo aplica una transformacion basada en el valor del numero primo
+    * a cada caracter del texto de entrada.
+    * </p>
+    * 
+    * @param plainText El texto plano a encriptar
+    * @param primeCode El codigo primo a usar como clave
+    * @return El texto encriptado
+    */
+    public String encode(String plainText, int primeCode) {
+        if (plainText == null || plainText.isEmpty()) {
+            return plainText;
         }
         
         StringBuilder encoded = new StringBuilder();
         
-        for (int i = 0; i < message.length(); i++) {
-            char c = message.charAt(i);
-            int shifted = c + (primeCode % 20);
-            encoded.append((char) shifted);
+        for (int i = 0; i < plainText.length(); i++) {
+            char c = plainText.charAt(i);
+            
+            // Aplicar transformacion basada en el codigo primo
+            // Usar diferentes operaciones para diferentes posiciones
+            int shift = (primeCode % 26) + (i % 5);
+            char encChar;
+            
+            if (Character.isLetter(c)) {
+                char base = Character.isUpperCase(c) ? 'A' : 'a';
+                encChar = (char) (((c - base + shift) % 26) + base);
+            } else if (Character.isDigit(c)) {
+                encChar = (char) (((c - '0' + shift) % 10) + '0');
+            } else {
+                // Para caracteres especiales, aplicar un desplazamiento simple
+                encChar = (char) (c + (shift % 5));
+            }
+            
+            encoded.append(encChar);
         }
         
         return encoded.toString();
-    }
-    
-    /**
-     * Checks if a message can be encoded with the given prime code.
-     * <p>
-     * This method validates that both the message and prime code are
-     * suitable for the encoding process.
-     * </p>
-     * 
-     * @param message The message to validate
-     * @param primeCode The prime code to validate
-     * @return true if the message can be encoded, false otherwise
-     */
-    public boolean canEncode(String message, int primeCode) {
-        return message != null && !message.isEmpty() && 
-               com.primesecure.model.PrimesList.isPrime(primeCode);
     }
 }

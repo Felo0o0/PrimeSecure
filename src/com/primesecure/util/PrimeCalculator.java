@@ -9,10 +9,10 @@ import com.primesecure.model.PrimesList;
 import java.util.Random;
 
 /**
- * Utility class for prime number operations.
+ * Utilidad para calcular y generar numeros primos.
  * <p>
- * This class provides static methods for performing various calculations
- * related to prime numbers, including generation and validation.
+ * Esta clase proporciona metodos para generar numeros primos aleatorios
+ * y verificar si un numero es primo.
  * </p>
  * 
  * @author PrimeSecure Team
@@ -21,50 +21,52 @@ import java.util.Random;
  */
 public class PrimeCalculator {
     
-    /** Random number generator for prime selection */
+    /** Generador de numeros aleatorios */
     private static final Random random = new Random();
     
     /**
-     * Generates a random prime number within the specified range.
-     * <p>
-     * This method searches for a prime number within the given range
-     * and returns one at random.
-     * </p>
-     * 
-     * @param min The minimum value of the range (inclusive)
-     * @param max The maximum value of the range (inclusive)
-     * @return A random prime number within the range, or -1 if none found
-     */
+    * Genera un numero primo aleatorio dentro de un rango especificado.
+    * <p>
+    * Este metodo busca un numero primo aleatorio entre min y max (inclusive).
+    * Si no se encuentra un primo despues de 100 intentos, retorna -1.
+    * </p>
+    * 
+    * @param min El limite inferior del rango (inclusive)
+    * @param max El limite superior del rango (inclusive)
+    * @return Un numero primo aleatorio, o -1 si no se encuentra ninguno
+    */
     public static int generateRandomPrime(int min, int max) {
-        if (min > max || min < 2) {
-            return -1;
-        }
+        if (min < 2) min = 2; // El primer numero primo es 2
         
-        // Find all primes in the range
-        PrimesList primes = new PrimesList();
-        for (int i = min; i <= max; i++) {
-            if (PrimesList.isPrime(i)) {
-                primes.add(i);
+        // Limitar intentos para evitar bucles infinitos
+        int maxAttempts = 100;
+        
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            int candidate = random.nextInt(max - min + 1) + min;
+            
+            if (PrimesList.isPrime(candidate)) {
+                return candidate;
             }
         }
         
-        // If no primes found, return -1
-        if (primes.isEmpty()) {
-            return -1;
+        // Fallback: buscar secuencialmente
+        for (int i = min; i <= max; i++) {
+            if (PrimesList.isPrime(i)) {
+                return i;
+            }
         }
         
-        // Return a random prime from the list
-        return primes.get(random.nextInt(primes.size()));
+        return -1; // No se encontro ningun primo en el rango
     }
     
     /**
-     * Finds the next prime number after the specified value.
-     * 
-     * @param start The starting value
-     * @return The next prime number greater than start
-     */
-    public static int findNextPrime(int start) {
-        int candidate = start + 1;
+    * Calcula el siguiente numero primo despues de un valor dado.
+    * 
+    * @param startValue El valor desde el cual comenzar la busqueda
+    * @return El siguiente numero primo
+    */
+    public static int nextPrime(int startValue) {
+        int candidate = startValue + 1;
         
         while (!PrimesList.isPrime(candidate)) {
             candidate++;
@@ -74,32 +76,21 @@ public class PrimeCalculator {
     }
     
     /**
-     * Calculates the greatest common divisor of two numbers.
-     * <p>
-     * This method uses Euclid's algorithm to find the GCD.
-     * </p>
-     * 
-     * @param a The first number
-     * @param b The second number
-     * @return The greatest common divisor of a and b
-     */
-    public static int gcd(int a, int b) {
-        while (b != 0) {
-            int temp = b;
-            b = a % b;
-            a = temp;
+    * Calcula el numero primo anterior a un valor dado.
+    * 
+    * @param startValue El valor desde el cual comenzar la busqueda
+    * @return El numero primo anterior, o -1 si no existe ninguno
+    */
+    public static int previousPrime(int startValue) {
+        int candidate = startValue - 1;
+        
+        while (candidate >= 2) {
+            if (PrimesList.isPrime(candidate)) {
+                return candidate;
+            }
+            candidate--;
         }
-        return a;
-    }
-    
-    /**
-     * Checks if two numbers are coprime (their GCD is 1).
-     * 
-     * @param a The first number
-     * @param b The second number
-     * @return true if the numbers are coprime, false otherwise
-     */
-    public static boolean areCoprime(int a, int b) {
-        return gcd(a, b) == 1;
+        
+        return -1; // No hay primos menores que 2
     }
 }

@@ -6,59 +6,59 @@
 package com.primesecure.security;
 
 /**
- * Provides functionality to decode messages encrypted with prime numbers.
+ * Proporciona funcionalidad para desencriptar texto usando numeros primos.
  * <p>
- * This class implements the decryption algorithm that reverses the
- * encryption performed by PrimeEncoder.
+ * Esta clase implementa un algoritmo de desencriptacion basado en numeros primos
+ * para transformar texto encriptado en texto plano.
  * </p>
  * 
  * @author PrimeSecure Team
  * @version 1.0
  * @since 2023-07-01
- * @see com.primesecure.security.PrimeEncoder
  */
 public class PrimeDecoder {
     
     /**
-     * Decodes a message using a prime number as the decryption key.
-     * <p>
-     * The algorithm reverses the character transformation performed
-     * during encoding.
-     * </p>
-     * 
-     * @param encodedMessage The encoded message to decode
-     * @param primeCode The prime number used as the encryption key
-     * @return The decoded (plain text) message
-     */
-    public String decode(String encodedMessage, int primeCode) {
-        if (encodedMessage == null || encodedMessage.isEmpty()) {
-            return encodedMessage;
+    * Desencripta un texto usando un codigo primo como clave.
+    * <p>
+    * El algoritmo revierte la transformacion aplicada por el PrimeEncoder
+    * usando el mismo valor de numero primo.
+    * </p>
+    * 
+    * @param encodedText El texto encriptado a desencriptar
+    * @param primeCode El codigo primo usado como clave
+    * @return El texto plano original
+    */
+    public String decode(String encodedText, int primeCode) {
+        if (encodedText == null || encodedText.isEmpty()) {
+            return encodedText;
         }
         
         StringBuilder decoded = new StringBuilder();
         
-        for (int i = 0; i < encodedMessage.length(); i++) {
-            char c = encodedMessage.charAt(i);
-            int shifted = c - (primeCode % 20);
-            decoded.append((char) shifted);
+        for (int i = 0; i < encodedText.length(); i++) {
+            char c = encodedText.charAt(i);
+            
+            // Revertir la transformacion basada en el codigo primo
+            // Usar las mismas operaciones que en encode pero en reversa
+            int shift = (primeCode % 26) + (i % 5);
+            char decChar;
+            
+            if (Character.isLetter(c)) {
+                char base = Character.isUpperCase(c) ? 'A' : 'a';
+                // Agregar 26 para manejar valores negativos en el modulo
+                decChar = (char) (((c - base - shift + 26) % 26) + base);
+            } else if (Character.isDigit(c)) {
+                // Agregar 10 para manejar valores negativos en el modulo
+                decChar = (char) (((c - '0' - shift + 10) % 10) + '0');
+            } else {
+                // Para caracteres especiales, revertir el desplazamiento simple
+                decChar = (char) (c - (shift % 5));
+            }
+            
+            decoded.append(decChar);
         }
         
         return decoded.toString();
-    }
-    
-    /**
-     * Checks if a message can be decoded with the given prime code.
-     * <p>
-     * This method validates that both the encoded message and prime code are
-     * suitable for the decoding process.
-     * </p>
-     * 
-     * @param encodedMessage The encoded message to validate
-     * @param primeCode The prime code to validate
-     * @return true if the message can be decoded, false otherwise
-     */
-    public boolean canDecode(String encodedMessage, int primeCode) {
-        return encodedMessage != null && !encodedMessage.isEmpty() && 
-               com.primesecure.model.PrimesList.isPrime(primeCode);
     }
 }
